@@ -1,0 +1,19 @@
+{
+  "name": "typescript-rtti",
+  "version": "0.1.0",
+  "description": "Run-Time Type Information for TypeScript",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "peerDependencies": {
+    "typescript": ">=3.3"
+  },
+  "devDependencies": {
+    "@types/node": "^11.9.5",
+    "ts-node": "^8.0.2",
+    "typescript": "^3.3.3333"
+  }
+}
