@@ -43,6 +43,10 @@ function isTypeinfoCallExpr(
   return declaration.getSourceFile().fileName.startsWith(PATH_PREFIX);
 }
 
+function createTypeInfoStorageExpr(): ts.Expression {
+  return ts.createIdentifier("__TYPEINFO__");
+}
+
 function createVisitor(
   context: ts.TransformationContext,
   sourceFile: ts.SourceFile,
@@ -69,10 +73,13 @@ function createVisitor(
         printType(type, typeChecker, sourceFile);
       }
 
+      const typeInfoStorageExpr = createTypeInfoStorageExpr();
+
+      const typeSource = typeToSource(type, typeChecker, sourceFile);
       const typeInfoExpr = ts.createObjectLiteral([
         ts.createPropertyAssignment(
           "source",
-          ts.createLiteral(typeToSource(type, typeChecker, sourceFile)),
+          ts.createLiteral(typeSource),
         ),
 
         ts.createPropertyAssignment(
@@ -80,7 +87,18 @@ function createVisitor(
           ts.createLiteral(sourceFile.fileName),
         ),
       ]);
-      return typeInfoExpr;
+
+      const typeId = ts.createLiteral(`${typeSource}@${sourceFile.fileName}`)
+
+      // __TYPEINFO__[typeId] ? __TYPEINFO__[typeId] : (__TYPEINFO__[typeId] = { ... })
+
+      const typeInfoAccessExpr = ts.createElementAccess(typeInfoStorageExpr, typeId);
+
+      return ts.createConditional(
+        typeInfoAccessExpr,
+        typeInfoAccessExpr,
+        ts.createAssignment(typeInfoAccessExpr, typeInfoExpr),
+      );
     }
     return ts.visitEachChild(node, visitor, context);
   };
