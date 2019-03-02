@@ -9,7 +9,13 @@ function say(s: string) {
 
 // name: string
 
-say(typeinfo<string>().name);
+say(typeinfo("foo").source);
+
+interface I {
+  foo: "bar";
+}
+
+say(typeinfo<I>().source)
 
 // validate(value: T): value is T
 
