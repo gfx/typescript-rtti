@@ -2,6 +2,7 @@ import ts from "typescript";
 import * as utils from "tsutils";
 
 const TYPEINFO_FUNC_NAME = "typeinfo";
+const PATH_PREFIX = __dirname + "/";
 
 function p(node: ts.Node) {
   console.warn(
@@ -26,11 +27,11 @@ function isTypeInfoCallExpr(
   if (!declaration) {
     return false;
   }
-  console.log(declaration.getSourceFile().fileName);
+
   return (
-    /\btypeinfo\b/.test(declaration.getSourceFile().fileName) &&
-    !!(declaration as any).name &&
-    (declaration as any).name.getText() === "typeinfo"
+    declaration.getSourceFile().fileName.startsWith(PATH_PREFIX) &&
+    (declaration as any).name &&
+    (declaration as any).name.getText() === TYPEINFO_FUNC_NAME
   );
 }
 
@@ -44,19 +45,10 @@ function createVisitor(
 
   const visitor: ts.Visitor = (node: ts.Node): ts.VisitResult<ts.Node> => {
     // Detect a call expression for typescript-rtti's typeinfo()
-    if (
-      utils.isCallExpression(node) &&
-      utils.isPropertyAccessExpression(node.expression)
-    ) {
+    if (isTypeInfoCallExpr(node, typeChecker)) {
       const propertyAccessExpr = node.expression;
 
-      // FIXME: more strict check in calling `typeinfo()`
-      if (propertyAccessExpr.name.text === "typeinfo") {
-        // replace typeinfo<T>() to global.__TYPE_INFO_STORE.fetch("T")
-
-        console.log(node);
-        p(propertyAccessExpr.name);
-      }
+        p(propertyAccessExpr);
     }
     return ts.visitEachChild(node, visitor, context);
   };
