@@ -4,7 +4,7 @@
   "description": "Run-Time Type Information for TypeScript",
   "main": "dist/index.js",
   "scripts": {
-    "test": "mocha --opts test/.opts 'test/**/*.test.ts'"
+    "test": "mocha --require ./register.js 'test/**/*.test.ts'"
   },
   "author": "gfx (FUJI Goro)",
   "license": "ISC",
