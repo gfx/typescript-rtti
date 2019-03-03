@@ -15,4 +15,16 @@ describe("typeinfo", () => {
       assert.deepStrictEqual(typeinfo<{ foo: boolean }>().source, '{ foo: boolean; }');
     });
   });
+
+  describe("#validate", () => {
+    it("validates string", () => {
+      assert.ok(typeinfo<string>().validate("foo"));
+      assert.ok(!typeinfo<string>().validate(42));
+    });
+
+    it("validates number", () => {
+      assert.ok(typeinfo<number>().validate(42));
+      assert.ok(!typeinfo<number>().validate("foo"));
+    });
+  });
 });

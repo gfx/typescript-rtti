@@ -1,12 +1,16 @@
 import ts from "typescript";
-import { isCallExpression, isSignatureDeclaration } from 'tsutils';
-import { DEBUG, printType } from './debugUtils';
-import { TypeInfoStorageName } from './typeInfoStorage';
+import { isCallExpression, isSignatureDeclaration } from "tsutils";
+import { DEBUG, printType } from "./debugUtils";
+import { TypeInfoStorageName } from "./typeInfoStorage";
 
 const TYPEINFO_FUNC_NAME = "typeinfo";
 const PATH_PREFIX = __dirname + "/";
 
-function typeToSource(type: ts.Type, typeChecker: ts.TypeChecker, sourceFile: ts.SourceFile) {
+function typeToSource(
+  type: ts.Type,
+  typeChecker: ts.TypeChecker,
+  sourceFile: ts.SourceFile
+) {
   const typeNode = typeChecker.typeToTypeNode(type);
   if (!typeNode) {
     throw new Error("[BUG] Failed to convert a Type to a TypeNode");
@@ -48,6 +52,85 @@ function createTypeInfoStorageExpr(): ts.Expression {
   return ts.createIdentifier(TypeInfoStorageName);
 }
 
+function checkTypeFlags(type: ts.Type, flags: ts.TypeFlags) {
+  return !!(type.flags & flags);
+}
+
+function isStringType(type: ts.Type): boolean {
+  return checkTypeFlags(type, ts.TypeFlags.String);
+}
+
+function isNumberType(type: ts.Type): boolean {
+  return checkTypeFlags(type, ts.TypeFlags.Number);
+}
+
+function createTypeStorageAccess(id: string): ts.Expression {
+  return ts.createElementAccess(
+    createTypeInfoStorageExpr(),
+    ts.createStringLiteral(id)
+  );
+}
+
+function isBuiltInType(type: ts.Type) {
+  return checkTypeFlags(
+    type,
+    ts.TypeFlags.String |
+      ts.TypeFlags.Number |
+      ts.TypeFlags.Boolean |
+      ts.TypeFlags.Null |
+      ts.TypeFlags.Undefined
+  );
+}
+
+function createTypeInfo(
+  type: ts.Type,
+  typeChecker: ts.TypeChecker,
+  sourceFile: ts.SourceFile
+) {
+  if (isBuiltInType(type)) {
+    return createTypeStorageAccess(typeToSource(type, typeChecker, sourceFile));
+  }
+
+  const typeSource = typeToSource(type, typeChecker, sourceFile);
+  const typeInfoExpr = ts.createObjectLiteral([
+    ts.createPropertyAssignment("source", ts.createStringLiteral(typeSource)),
+
+    ts.createPropertyAssignment(
+      "sourceFile",
+      ts.createStringLiteral(sourceFile.fileName)
+    ),
+
+    ts.createPropertyAssignment(
+      "validate",
+      // FIXME
+      ts.createArrowFunction(
+        undefined,
+        undefined,
+        [],
+        ts.createKeywordTypeNode(ts.SyntaxKind.NeverKeyword),
+        undefined,
+        ts.createBlock([
+          ts.createThrow(
+            ts.createNew(ts.createIdentifier("Error"), undefined, [
+              ts.createStringLiteral(
+                `Not yet implemented: typeinfo<${typeSource}>().validate()`
+              )
+            ])
+          )
+        ])
+      )
+    )
+  ]);
+
+  const typeId = `${typeSource}@${sourceFile.fileName}`;
+
+  return ts.createConditional(
+    createTypeStorageAccess(typeId),
+    createTypeStorageAccess(typeId),
+    ts.createAssignment(createTypeStorageAccess(typeId), typeInfoExpr)
+  );
+}
+
 function createVisitor(
   context: ts.TransformationContext,
   sourceFile: ts.SourceFile,
@@ -74,32 +157,7 @@ function createVisitor(
         printType(type, typeChecker, sourceFile);
       }
 
-      const typeInfoStorageExpr = createTypeInfoStorageExpr();
-
-      const typeSource = typeToSource(type, typeChecker, sourceFile);
-      const typeInfoExpr = ts.createObjectLiteral([
-        ts.createPropertyAssignment(
-          "source",
-          ts.createLiteral(typeSource),
-        ),
-
-        ts.createPropertyAssignment(
-          "sourceFile",
-          ts.createLiteral(sourceFile.fileName),
-        ),
-      ]);
-
-      const typeId = ts.createLiteral(`${typeSource}@${sourceFile.fileName}`)
-
-      // __TYPEINFO__[typeId] ? __TYPEINFO__[typeId] : (__TYPEINFO__[typeId] = { ... })
-
-      const typeInfoAccessExpr = ts.createElementAccess(typeInfoStorageExpr, typeId);
-
-      return ts.createConditional(
-        typeInfoAccessExpr,
-        typeInfoAccessExpr,
-        ts.createAssignment(typeInfoAccessExpr, typeInfoExpr),
-      );
+      return createTypeInfo(type, typeChecker, sourceFile);
     }
     return ts.visitEachChild(node, visitor, context);
   };

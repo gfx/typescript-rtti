@@ -10,6 +10,7 @@ function say(s: string) {
 
 // name: string
 
+say(typeinfo<string>().source);
 say(typeinfo("foo").source);
 
 interface I {

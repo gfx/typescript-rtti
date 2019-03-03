@@ -1,4 +1,4 @@
-const g: any = (() => {
+const g: object = (() => {
   return typeof global !== "undefined" ? global : self;
 })();
 
@@ -8,5 +8,5 @@ export const TypeInfoStorageName = "__TYPEINFO__";
 
 g[TypeInfoStorageName] = {};
 
-export const typeInfoStorage: TypeInfoStorageType = g.TypeInfoStorageName;
+export const typeInfoStorage: TypeInfoStorageType = g[TypeInfoStorageName];
 
