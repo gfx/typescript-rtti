@@ -1,4 +1,4 @@
-import "./storage";
+import "./typeInfoStorage";
 import { TypeInfo } from "./types";
 
 export function typeinfo<T>(_value?: T): Readonly<TypeInfo<T>> {

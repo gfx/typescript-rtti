@@ -1,6 +1,7 @@
 import ts from "typescript";
 import { isCallExpression, isSignatureDeclaration } from 'tsutils';
 import { DEBUG, printType } from './debugUtils';
+import { TypeInfoStorageName } from './typeInfoStorage';
 
 const TYPEINFO_FUNC_NAME = "typeinfo";
 const PATH_PREFIX = __dirname + "/";
@@ -44,7 +45,7 @@ function isTypeinfoCallExpr(
 }
 
 function createTypeInfoStorageExpr(): ts.Expression {
-  return ts.createIdentifier("__TYPEINFO__");
+  return ts.createIdentifier(TypeInfoStorageName);
 }
 
 function createVisitor(

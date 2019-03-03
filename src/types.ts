@@ -1,6 +1,6 @@
 // Built-in TypeInfo objects.
 
-import { __TYPEINFO__ } from "./storage";
+import { typeInfoStorage } from "./typeInfoStorage";
 
 export interface TypeInfo<T> {
   /**
@@ -25,7 +25,7 @@ class BuiltInTypeInfo<T> implements TypeInfo<T> {
   }
 
   static register<T>(id: string, validate: TypeInfo<T>["validate"]) {
-    __TYPEINFO__[id] = new BuiltInTypeInfo(id, validate);
+    typeInfoStorage[id] = new BuiltInTypeInfo(id, validate);
   }
 }
 
