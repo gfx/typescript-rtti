@@ -118,3 +118,6 @@ export function createTransformerFactory(
     };
   };
 }
+
+// for ttypescript
+export default createTransformerFactory;

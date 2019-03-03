@@ -1,4 +1,5 @@
-#!npx ts-node -r ./register.ts example/hello.ts
+// npx ts-node compile.ts example/hello.ts
+// npx ts-node --compiler ttypescript example/hello.ts
 
 import * as util from "util";
 import { typeinfo } from "../src/typeinfo";

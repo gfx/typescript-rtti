@@ -4,7 +4,7 @@
   "description": "Run-Time Type Information for TypeScript",
   "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --opts test/.opts 'test/**/*.test.ts'"
   },
   "author": "gfx (FUJI Goro)",
   "license": "ISC",
@@ -18,10 +18,11 @@
     "ts-jest": "*",
     "ts-node": "*",
     "ts-transformer-enumerate": "*",
-    "typescript": ">= 3.3"
+    "ttypescript": "*",
+    "typescript": "*"
   },
   "dependencies": {
-    "tslib": "^1.9.3",
-    "tsutils": "^3.8.0"
+    "tslib": "*",
+    "tsutils": "*"
   }
 }
