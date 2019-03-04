@@ -1,13 +1,18 @@
 {
-  "name": "@gfx/typescript-rtti",
+  "name": "@typescript-rtti/typeinfo",
   "version": "0.1.0",
   "description": "Run-Time Type Information for TypeScript",
+  "author": "gfx (FUJI Goro)",
+  "contributors": [],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gfx/typescript-rtti"
+  },
+  "license": "ISC",
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha --require ./register.js 'test/**/*.test.ts'"
   },
-  "author": "gfx (FUJI Goro)",
-  "license": "ISC",
   "peerDependencies": {
     "typescript": ">=3.3"
   },
